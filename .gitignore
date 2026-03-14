@@ -1,0 +1,20 @@
+# Python cache
+__pycache__/
+*.py[cod]
+
+# Virtual environments
+.env
+venv/
+env/
+
+# Generated docs output folders (except the ones committed intentionally)
+nmpartnership/
+htai/
+*.zip
+
+# Streamlit local secrets — DO NOT push to GitHub
+.streamlit/secrets.toml
+
+# Temp files
+*.DS_Store
+read_pdfs.py

@@ -11,7 +11,11 @@ st.title("📄 AI Documentation Generator")
 st.markdown("Generate 5 professional business documents for any organization — instantly using AI.")
 
 # Load Groq API key from Streamlit secrets (works both locally and on Streamlit Cloud)
-groq_api_key = st.secrets.get("GROQ_API_KEY", os.environ.get("GROQ_API_KEY", ""))
+try:
+    groq_api_key = st.secrets["GROQ_API_KEY"]
+except (KeyError, FileNotFoundError):
+    groq_api_key = os.environ.get("GROQ_API_KEY", "")
+
 if not groq_api_key:
     st.error("⚠️ GROQ_API_KEY is not configured. Please add it in `.streamlit/secrets.toml` (locally) or Streamlit Cloud Secrets settings.")
     st.stop()

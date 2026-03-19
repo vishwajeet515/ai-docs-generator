@@ -44,16 +44,19 @@ if st.button("🚀 Generate Documents", type="primary"):
 
     # Parse organization name
     safe_domain_name = "organization"
+    final_url = ""
     if url_input.strip():
         try:
             raw_url = url_input.strip()
             if not raw_url.startswith("http"):
                 raw_url = "https://" + raw_url
+            final_url = raw_url
             domain = urlparse(raw_url).netloc.replace("www.", "")
             name = domain.split('.')[0]
             if name:
                 safe_domain_name = name
         except Exception:
+            final_url = url_input.strip()
             pass
     elif uploaded_file:
         # Use filename without extension as org name
@@ -68,9 +71,9 @@ if st.button("🚀 Generate Documents", type="primary"):
     combined_context = ""
 
     # Step 1: Scrape website (if URL provided)
-    if url_input.strip():
-        status_text.text(f"🔍 Scraping text from {url_input.strip()}...")
-        web_text = extract_text_from_url(url_input.strip())
+    if final_url:
+        status_text.text(f"🔍 Scraping text from {final_url}...")
+        web_text = extract_text_from_url(final_url)
         if web_text:
             combined_context += "=== FROM WEBSITE ===\n" + web_text
         else:

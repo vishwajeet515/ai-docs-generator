@@ -28,17 +28,18 @@ if not groq_api_key:
 
 # --- Inputs ---
 url_input = st.text_input("🌐 Organization Website URL (optional):", placeholder="https://nmpartnership.com/")
-uploaded_file = st.file_uploader(
-    "📎 Upload a PPT or PDF (optional):",
+uploaded_files = st.file_uploader(
+    "📎 Upload PPT or PDF files (optional):",
     type=["pptx", "pdf"],
-    help="Upload a company presentation or document to supplement the website content."
+    accept_multiple_files=True,
+    help="Upload one or more company presentations or documents to supplement the website content."
 )
 
-st.caption("💡 You can provide a URL, a file, or both — the AI will combine all available information.")
+st.caption("💡 You can provide a URL, one or more files, or both — the AI will combine all available information.")
 
 if st.button("🚀 Generate Documents", type="primary"):
 
-    if not url_input.strip() and uploaded_file is None:
+    if not url_input.strip() and not uploaded_files:
         st.error("Please provide at least a URL or upload a file.")
         st.stop()
 
@@ -58,9 +59,9 @@ if st.button("🚀 Generate Documents", type="primary"):
         except Exception:
             final_url = url_input.strip()
             pass
-    elif uploaded_file:
-        # Use filename without extension as org name
-        safe_domain_name = os.path.splitext(uploaded_file.name)[0].replace(" ", "_").lower()
+    elif uploaded_files:
+        # Use first filename without extension as org name
+        safe_domain_name = os.path.splitext(uploaded_files[0].name)[0].replace(" ", "_").lower()
 
     tmp_dir = tempfile.mkdtemp()
     org_folder = os.path.join(tmp_dir, safe_domain_name)
@@ -81,19 +82,20 @@ if st.button("🚀 Generate Documents", type="primary"):
 
     progress_bar.progress(15)
 
-    # Step 2: Extract text from uploaded file (if provided)
-    if uploaded_file is not None:
-        status_text.text(f"📂 Reading uploaded file: {uploaded_file.name}...")
-        file_bytes = uploaded_file.read()
-        if uploaded_file.name.endswith(".pptx"):
-            file_text = extract_text_from_pptx(file_bytes)
-        else:
-            file_text = extract_text_from_pdf(file_bytes)
+    # Step 2: Extract text from uploaded files (if provided)
+    if uploaded_files:
+        for uploaded_file in uploaded_files:
+            status_text.text(f"📂 Reading uploaded file: {uploaded_file.name}...")
+            file_bytes = uploaded_file.read()
+            if uploaded_file.name.endswith(".pptx"):
+                file_text = extract_text_from_pptx(file_bytes)
+            else:
+                file_text = extract_text_from_pdf(file_bytes)
 
-        if file_text:
-            combined_context += "\n\n=== FROM UPLOADED FILE ===\n" + file_text
-        else:
-            st.warning(f"⚠️ Could not extract text from the uploaded file.")
+            if file_text:
+                combined_context += f"\n\n=== FROM UPLOADED FILE: {uploaded_file.name} ===\n" + file_text
+            else:
+                st.warning(f"⚠️ Could not extract text from {uploaded_file.name}.")
 
     progress_bar.progress(25)
 
